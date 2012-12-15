@@ -39,12 +39,19 @@ abstract class Layer {
   }
 }
 
+abstract class NonInputLayer extends Layer {
+  NonInputLayer(int nodes, bool hasBias) : super(nodes, hasBias);
+  
+  List<double> backpropagate(List<double> outputs, double rate, double momentum);
+  void update(Layer prev);
+}
+
 class InputLayer extends Layer {
-  HiddenLayer nextLayer;
+  NonInputLayer nextLayer;
   Matrix weights;
   Matrix weightChanges;
   
-  InputLayer(int nodes, HiddenLayer this.nextLayer) : super(nodes, true){
+  InputLayer(int nodes, NonInputLayer this.nextLayer) : super(nodes, true){
     weights = new Matrix(maxNode + 1, nextLayer.maxNode + 1);
     weightChanges = new Matrix(maxNode + 1, nextLayer.maxNode + 1);
     
@@ -60,7 +67,6 @@ class InputLayer extends Layer {
     for (int n = 0; n < inputs.length; ++n) {
       values[n+1] = inputs[n];
     }
-    // print('Updated inputs: ${values}');
     nextLayer.update(this);
   }
   
@@ -77,12 +83,12 @@ class InputLayer extends Layer {
   }
 }
 
-class HiddenLayer extends Layer {
-  OutputLayer nextLayer;
+class HiddenLayer extends NonInputLayer {
+  NonInputLayer nextLayer;
   Matrix weights;
   Matrix weightChanges;
   
-  HiddenLayer(int nodes, OutputLayer this.nextLayer) : super(nodes, true) {
+  HiddenLayer(int nodes, NonInputLayer this.nextLayer) : super(nodes, true) {
     weights = new Matrix(maxNode + 1, nextLayer.maxNode + 1);
     weightChanges = new Matrix(maxNode + 1, nextLayer.maxNode + 1);
     
@@ -102,7 +108,6 @@ class HiddenLayer extends Layer {
       }
       values[n] = logit(sum);
     }
-    // print('Updated hidden: ${values}');
     nextLayer.update(this);
   }
   
@@ -131,7 +136,7 @@ class HiddenLayer extends Layer {
   }
 }
 
-class OutputLayer extends Layer {
+class OutputLayer extends NonInputLayer {
   OutputLayer(int nodes) : super(nodes, false) {
   }
   
@@ -143,7 +148,6 @@ class OutputLayer extends Layer {
       }
       values[n] = logit(sum);
     }
-    // print('Updated outputs: ${values}');
   }
 
   List<double> backpropagate(List<double> outputs, double rate, double momentum) {
@@ -171,11 +175,10 @@ class Example {
 
 class BasicNetwork {
   InputLayer input;
-  HiddenLayer hidden;
   OutputLayer output;
   int numIterations = 0;
   
-  BasicNetwork(InputLayer this.input, HiddenLayer this.hidden, OutputLayer this.output);
+  BasicNetwork(InputLayer this.input, OutputLayer this.output);
   
   void train(List<Example> trainingExamples, List<Example> testExamples, double rate, double momentum) {
     int numIterations = 0;

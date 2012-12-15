@@ -95,8 +95,9 @@ BasicNetwork network;
 void nnTest(Event event) {
   OutputLayer output = new OutputLayer(1);
   HiddenLayer hidden = new HiddenLayer(3, output);
+  // HiddenLayer hidden2 = new HiddenLayer(3, hidden);
   InputLayer input = new InputLayer(2, hidden);
-  network = new BasicNetwork(input, hidden, output);
+  network = new BasicNetwork(input, output);
   
   window.requestAnimationFrame(tick);
 }
