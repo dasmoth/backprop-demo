@@ -3,7 +3,7 @@ library xordemo;
 import 'dart:html';
 import 'dart:math';
 
-part 'backprop.dart';
+import 'backprop.dart';
 
 class ViewerRow {
   List inputCells = [];
