@@ -168,6 +168,25 @@ class OutputLayer extends NonInputLayer {
   }
 }
 
+class MultinomialOutputLayer extends OutputLayer {
+  MultinomialOutputLayer(int nodes) : super(nodes);
+  
+  void update(Layer prev) {
+    double tot = 0.0;
+    for (int n = 1; n <= maxNode; ++n) {
+      double sum = 0.0;
+      for (int m = prev.minNode; m <= prev.maxNode; ++m) {
+        sum += prev.values[m] * prev.weights.get(m, n);
+      }
+      values[n] = exp(sum);
+      tot += values[n];
+    }
+    for (int n = 1; n <= maxNode; ++n) {
+      values[n] = values[n]/tot;
+    }
+  }
+}
+
 class Example {
   List<double> inputs;
   List<double> outputs;
@@ -179,6 +198,7 @@ class BasicNetwork {
   InputLayer input;
   OutputLayer output;
   int numIterations = 0;
+  double inputFuzz = 0.0;
   
   BasicNetwork(InputLayer this.input, OutputLayer this.output);
   
@@ -197,6 +217,14 @@ class BasicNetwork {
       ++numIterations;
       double trainingError = 0.0;
       for (Example e in trainingExamples) {
+        List<double> fuzzedInputs = new List<double>(e.inputs.length);
+        for (int i = 0; i < fuzzedInputs.length; ++i) {
+          if (Layer.rng.nextDouble() > inputFuzz) {
+            fuzzedInputs[i] = e.inputs[i];
+          } else {
+            fuzzedInputs[i] = 1.0 - e.inputs[i];
+          }
+        }
         input.update(e.inputs);
         input.backpropagate(e.outputs, rate, momentum);
         

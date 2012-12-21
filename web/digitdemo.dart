@@ -183,11 +183,12 @@ void main() {
 BasicNetwork network;
 
 void nnTest(Event event) {
-  OutputLayer output = new OutputLayer(10);
+  OutputLayer output = new MultinomialOutputLayer(10);
   HiddenLayer hidden = new HiddenLayer(20, output);
   HiddenLayer hidden2 = new HiddenLayer(40, hidden);
-  InputLayer input = new InputLayer(25, hidden);
+  InputLayer input = new InputLayer(25, hidden2);
   network = new BasicNetwork(input, output);
+  network.inputFuzz = 0.1;
   
   window.requestAnimationFrame(tick);
 }
